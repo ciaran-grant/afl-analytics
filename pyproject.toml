@@ -1,0 +1,19 @@
+[project]
+name = "afl-analytics"
+description = "Learning Value and Style from Aussie Rules Event Data."
+readme = "README.md"
+license = {file = "LICENSE"}
+version = "1.0.0"
+authors = [
+    { name = "Ciaran Grant", email = "ciaran.grant@hotmail.co.uk" }
+]
+requires-python = ">=3.11"
+
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

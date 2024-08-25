@@ -1,3 +1,6 @@
+data/
+notebooks/_eda/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
