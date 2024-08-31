@@ -22,7 +22,7 @@ field_width: float = 135.0  # unit: meters
 
 bodyparts: list[str] = ["foot", "hand"]
 
-results: list[str] = ["fail", "success"]
+results: list[str] = ["fail", "success", "goal", "behind", "miss"]
 
 actiontypes: list[str] = [
     'bounce',

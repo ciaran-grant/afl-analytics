@@ -91,8 +91,7 @@ description_to_action_mapping = {
     'Hard Ball Get Crumb':'hard_ball_get',
     'Gather from Opposition':'gather_from_opposition',
     'Bounce':'bounce',
-    'Shot At Goal':'shot',
-    'Mark Fumbled':'mark_fumbled',
+    'Mark Fumbled':'non_action', # same as mark_dropped mostly
     'Mark Dropped':'mark_dropped',
     'OOF Kick In':'kickin_oof',
     'Out On Full After Kick':'non_action',
@@ -108,7 +107,7 @@ description_to_action_mapping = {
 def _create_action_type(chains):
     
     action_type = chains['Description'].map(description_to_action_mapping)
-    action_type = np.where(chains['Shot_At_Goal']==True, 'shot', action_type)
+    action_type = np.where((chains['Shot_At_Goal']=="TRUE") | (chains['Shot_At_Goal'] == True), 'shot', action_type)
       
     return action_type
 
@@ -132,6 +131,14 @@ def _create_result(actions):
     result = np.where(actions['Disposal'] == 'effective', 'success', result)
     result = np.where(actions['Disposal'] == 'ineffective', 'fail', result)
     result = np.where(actions['Disposal'] == 'clanger', 'fail', result)
+    
+    shot_goal = (actions['action_type'] == "shot") & (actions['Final_State'] == "goal")
+    shot_behind = (actions['action_type'] == "shot") & (actions['Final_State'] == "behind")
+    shot_not_goal_behind = (actions['action_type'] == "shot") & ((actions['Final_State'] != "goal") | (actions['Final_State'] != "behind"))
+    result = np.where(shot_goal, "goal",
+                      np.where(shot_behind, "behind", 
+                               np.where(shot_not_goal_behind, "miss", 
+                                        result)))
 
     result = np.where(actions['action_type'] == 'bounce', 'success', result)
     result = np.where(actions['action_type'] == 'error', 'fail', result)
@@ -185,6 +192,7 @@ def _filter_arpadl_columns(actions):
     return actions[list(ARPADLSchema.to_schema().columns.keys())]
 
 min_carry_length: float = 3
+min_carry_time: float = 2
 
 def _add_carries(actions):
                 
@@ -195,6 +203,8 @@ def _add_carries(actions):
     dx = actions['end_x'] - next_actions['start_x']
     dy = actions['end_y'] - next_actions['start_y']
     far_enough = dx**2 + dy**2 >= min_carry_length**2
+    dt = next_actions['time_seconds'] - actions['time_seconds']
+    long_enough = dt >= min_carry_time
 
     curr_gather = (actions['action_type'] == 'gather')
     curr_gather_from_hitout = (actions['action_type'] == 'gather_from_hitout')
@@ -208,6 +218,7 @@ def _add_carries(actions):
         same_team
         & same_period
         & far_enough
+        & long_enough
         & (
             curr_gather | 
             curr_gather_from_hitout | 
