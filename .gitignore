@@ -1,5 +1,6 @@
 data/
 notebooks/_eda/
+requirements.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
