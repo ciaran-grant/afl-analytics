@@ -1,4 +1,4 @@
-"""Configuration of the SPADL language.
+"""Configuration of the ARPADL language.
 
 Attributes
 ----------
